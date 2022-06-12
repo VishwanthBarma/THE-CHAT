@@ -1,6 +1,8 @@
 import { useTheme } from 'next-themes';
 import React, { useState } from 'react';
-import { Switch } from '@headlessui/react';;
+import { Switch } from '@headlessui/react';
+import { auth } from '../firebase';
+
 
 function profile() {
     const {theme, setTheme} = useTheme();
@@ -30,6 +32,10 @@ function profile() {
             />
         </Switch>
         </div>
+
+
+        {/* Logout */}
+        <button onClick={() => auth.signOut()}>Logout</button>
 
     </div>
   )

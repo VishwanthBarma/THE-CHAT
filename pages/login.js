@@ -12,7 +12,7 @@ function Login() {
         <h1 className="text-sky-500 font-bold text-8xl">THE</h1>
         <h1 className="text-sky-500 font-bold text-8xl">CHAT</h1>
     </div>
-        <button onClick={signIn} className="font-bold bg-slate-200 p-3 rounded-lg hover:opacity-90 active:opacity-100">Sign in with Google</button>
+        <button onClick={signIn} className="font-bold bg-slate-200 p-3 rounded-lg hover:opacity-90 active:opacity-100 dark:text-black text-black">Sign in with Google</button>
     </div>
   )
 }
