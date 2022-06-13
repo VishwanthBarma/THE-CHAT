@@ -53,17 +53,11 @@ function NavBar() {
         // add searchUser in users chats if not exists
         if(!chatAlreadyExists(searchUser.email)){
             db.collection("chats").add({
-                users: [user.email, searchUser.email, searchUser.displayName, searchUser.photoURL],
+                users: [user.email, searchUser.email, searchUser.displayName, searchUser.photoURL, searchUser.lastSeen],
             });
             setAddedUserEmail(searchUser.email);
         }
     };
-
-    // console.log("Searched Results")
-    // console.log(searchResults)
-    // console.log("--------------------------------")
-    // console.log("UserChatList")
-    // console.log(userChatList)
 
   return (
     <div className="p-2 bg-gray-200 dark:bg-neutral-800 h-screen w-20 sm:w-60 flex flex-col space-y-3 items-center sticky left-0">
@@ -104,7 +98,7 @@ function NavBar() {
                     ?
                         userChatList?.docs.length != 0
                         ?
-                        userChatList?.docs.map(chat => <ChatsUser searchUser={false} user={chat.data()} />)
+                        userChatList?.docs.map(chat => <ChatsUser key={chat.id} chatId={chat.id} searchUser={false} user={chat.data()} />)
                         :
                         <h1 className="font-semibold text-red-500">No Chats</h1>
                     :
@@ -130,7 +124,7 @@ function NavBar() {
                             ?
                             searchResults?.map(user =>
                                 !chatAlreadyExists(user.data().email) &&
-                                <ChatsUser searchUser={true} user={user.data()} addUserToChats={addUserToChats}/>
+                                <ChatsUser key={user.id} searchUser={true} user={user.data()} addUserToChats={addUserToChats}/>
                             )
                             :
                             <h1 className="font-semibold text-red-500">No Users</h1>

@@ -1,13 +1,16 @@
+import { useRouter } from 'next/router';
 import React from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth';
 
-function ChatsUser({ searchUser, user, addUserToChats}) {
+function ChatsUser({ searchUser, chatId, user, addUserToChats}) {
+  const router = useRouter();
+  const id = chatId;
+
   const handleClick = () => {
     if(searchUser){
       addUserToChats(user);
     }else{
-      // opening chat of the clicked user account
-      console.log("I should open the chat page...")
+      router.push(`/chat/${id}`);
     }
   }
 
