@@ -10,10 +10,13 @@ import LoadingChatSearch from '../Loading/LoadingChatSearch';
 function NavBar() {
     const [input, setInput] = useState(null);
     const [user] = useAuthState(auth);
-    const [loading, setLoading] = useState(false);
+    const [loadingSearch, setLoadingSearch] = useState(false);
+    const [loadingChats, setLoadingChats] = useState(false);
 
     const [otherUsers, setOtherUsers] = useState(null);
     const [searchResults, setSearchResults] = useState([]);
+    const [userChatList, setUserChatList] = useState(null);
+    const [addedUserEmail, setAddedUserEmail] = useState(null);
 
     useEffect(() => {
         const getOtherUsers = async () => {
@@ -25,16 +28,46 @@ function NavBar() {
     }, []);
 
     useEffect(() => {
-        setLoading(true);
-        setSearchResults(() => otherUsers?.docs?.filter(user => user.data().email.includes(input.toLowerCase())));
-        setLoading(false);
+        setLoadingSearch(true);
+        setSearchResults(() => otherUsers?.docs?.filter(user => user.data().email.includes(input?.toLowerCase())));
+        setLoadingSearch(false);
     }, [input]);
 
-    // otherUsers?.docs?.map(doc => console.log(doc.id, doc.data()));
+    useEffect(() => {
+        setLoadingChats(true);
+        const getUserChatList = async () => {
+            const q = query(collection(db, "chats"), where("users", 'array-contains', user.email));
+            const querySnapshot = await getDocs(q);
+            setUserChatList(querySnapshot);
+        };
+        getUserChatList();
+        setLoadingChats(false);
+    },[addedUserEmail]);
 
+    const chatAlreadyExists = (searchUserEmail) => 
+        !!userChatList?.docs.find(
+            chat => chat.data().users.find(user => user === searchUserEmail)?.length > 0
+        );
+
+    const addUserToChats = (searchUser) => {
+        // add searchUser in users chats if not exists
+        if(!chatAlreadyExists(searchUser.email)){
+            db.collection("chats").add({
+                users: [user.email, searchUser.email, searchUser.displayName, searchUser.photoURL],
+            });
+            setAddedUserEmail(searchUser.email);
+        }
+    };
+
+    // console.log("Searched Results")
+    // console.log(searchResults)
+    // console.log("--------------------------------")
+    // console.log("UserChatList")
+    // console.log(userChatList)
 
   return (
     <div className="p-2 bg-gray-200 dark:bg-neutral-800 h-screen w-20 sm:w-60 flex flex-col space-y-3 items-center sticky left-0">
+        
         {/* Profile */}
 
         <Link href="/profile" passHref>
@@ -58,15 +91,25 @@ function NavBar() {
             <GrFormSearch className="sm:hidden h-8 w-8 opacity-50 dark:opacity-100"/>
         </div>
 
-
         {/* Chats */}
 
         <div className="bg-gray-300 dark:bg-neutral-700 max-h-[30rem] pb-3 w-full rounded-md">
             <div className="dark:bg-neutral-900 bg-white rounded-t-md p-1 px-2">
                 <h1 className="font-bold dark:text-orange-400">Chats</h1>
             </div>
-            <div className="p-1 py-2 flex max-h-[28rem] flex-col space-y-2 overflow-y-scroll">
-                {/* <ChatsUser searchUser={false} user/> */}
+            <div className="p-1 py-2 flex max-h-[28rem] flex-col space-y-2 items-center overflow-y-scroll">
+
+                {
+                    !loadingChats
+                    ?
+                        userChatList?.docs.length != 0
+                        ?
+                        userChatList?.docs.map(chat => <ChatsUser searchUser={false} user={chat.data()} />)
+                        :
+                        <h1 className="font-semibold text-red-500">No Chats</h1>
+                    :
+                    <LoadingChatSearch />
+                }
             </div>
         </div>
 
@@ -81,11 +124,14 @@ function NavBar() {
                     </div>
                     <div className="p-1 py-2 flex max-h-[16rem] overflow-y-scroll flex-col items-center space-y-2">
                     {
-                        !loading
+                        !loadingSearch
                         ?
                             searchResults?.length != 0
                             ?
-                            searchResults?.map(user => (<ChatsUser searchUser={true} user={user.data()} />))
+                            searchResults?.map(user =>
+                                !chatAlreadyExists(user.data().email) &&
+                                <ChatsUser searchUser={true} user={user.data()} addUserToChats={addUserToChats}/>
+                            )
                             :
                             <h1 className="font-semibold text-red-500">No Users</h1>
                         :
