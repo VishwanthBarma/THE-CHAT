@@ -60,7 +60,7 @@ function NavBar() {
     };
 
   return (
-    <div className="p-2 bg-gray-200 dark:bg-neutral-800 h-screen w-20 sm:w-60 flex flex-col space-y-3 items-center sticky left-0">
+    <div className="p-2 bg-gray-200 dark:bg-neutral-800 h-screen w-20 sm:w-60 flex flex-col space-y-3 items-center sticky left-0 top-0">
         
         {/* Profile */}
 
