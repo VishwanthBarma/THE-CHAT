@@ -51,9 +51,13 @@ function NavBar() {
 
     const addUserToChats = (searchUser) => {
         // add searchUser in users chats if not exists
+        console.log("me", user)
+        console.log("you", searchUser);
         if(!chatAlreadyExists(searchUser.email)){
             db.collection("chats").add({
-                users: [user.email, searchUser.email, searchUser.displayName, searchUser.photoURL, searchUser.lastSeen],
+                myId: user.uid,
+                users: [user.email, searchUser.email],
+                you: searchUser,
             });
             setAddedUserEmail(searchUser.email);
         }
@@ -98,7 +102,7 @@ function NavBar() {
                     ?
                         userChatList?.docs.length != 0
                         ?
-                        userChatList?.docs.map(chat => <ChatsUser key={chat.id} chatId={chat.id} searchUser={false} user={chat.data()} />)
+                        userChatList?.docs.map(chat => (<ChatsUser key={chat.id} chatId={chat.id} searchUser={false} user={chat.data()} firstEmail={chat.data().users[0]}/>))       
                         :
                         <h1 className="font-semibold text-red-500">No Chats</h1>
                     :

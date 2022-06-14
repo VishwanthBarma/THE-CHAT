@@ -1,28 +1,99 @@
 import React, { useState } from 'react'
-import { db } from '../../firebase';
+import { auth, db } from '../../firebase';
 import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 import moment from 'moment';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { useRouter } from 'next/router';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
+import Message from '../Message/Message';
+import { useCollection } from 'react-firebase-hooks/firestore';
 
 
 function ChatScreen({chat, messages}) {
+    const [recepientUser, setRecepientUser] = useState(null);
+    const [user] = useAuthState(auth);
+    const router = useRouter();
+
+    const [messageSnapshot] = useCollection(
+        db.collection("chats").doc(router.query.id).collection("messages", "asc")
+    );
+
+    const showMessages = () => {
+        if(messageSnapshot){
+            return messageSnapshot.docs.map((message) => 
+                <Message
+                    key={message.id}
+                    user={message.data().user}
+                    message={{
+                        ...message.data(),
+                        timestamp: message.data().timestamp?.toDate().getTime(),
+                    }}
+                 />
+            );
+        }else{
+            return messages.map(message => <Message
+                key={message.id}
+                user={message.user}
+                message={message}
+            />)
+        }
+    }
+
     const date = new Date(1970, 0, 1);
-    date.setSeconds(chat.users[4].seconds);
+    date.setSeconds(chat.you.lastSeen.seconds);
     const [msgInput, setMsgInput] = useState("");
+
     const handleSubmit = event => {
         event.preventDefault();
-        console.log("Form Submitted...");
+
+        // updating the user last seen
+        db.collection("users").doc(user.uid).set(
+            {
+                lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+        );
+
+        db.collection("chats").doc(router.query.id).collection("messages").add({
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            message: msgInput,
+            user: user.email,
+            photoURL: user.photoURL,
+        })
+
+        setMsgInput("");
+
     }
+
+    const getRecepientUser = async () => {
+        const docRef = doc(db, "users", chat.myId);
+        const docSnap = await getDoc(docRef);
+        setRecepientUser(docSnap.data());
+        date.setSeconds(recepientUser?.lastSeen.seconds);
+    }
+
+
+
   return (
     <div className="">
         {/* Header part */}
         <div className="h-16">    
             <div className="bg-black fixed h-16 top-0 right-0 left-20 flex flex-col justify-center sm:left-60 p-2">
-                <h1 className="font-bold text-black dark:text-amber-300">{chat?.users[2]}</h1>
+                {
+                    chat.users[0] != user.email
+                    ? getRecepientUser() && 
+                    <h1 className="font-bold text-black dark:text-orange-400">{recepientUser?.displayName}</h1>
+                    :
+                    <h1 className="font-bold text-black dark:text-orange-400">{chat?.you.displayName}</h1>
+
+                }
                 <div className="flex space-x-1 text-sm">
                     <h1 className="dark:text-slate-300">Last Active:</h1>
                     {
                         moment(date).fromNow() ?
-                        <h1 className="dark:text-green-300 text-black font-semibold opacity-50">{moment(date).fromNow()}</h1>:
+                        <h1 className="dark:text-orange-200 text-black font-semibold opacity-50">{moment(date).fromNow()}</h1>:
                         <h1 className="dark:text-red-300 text-black font-semibold">Unavailable</h1>                
                     }
                 </div>
@@ -32,6 +103,9 @@ function ChatScreen({chat, messages}) {
         {/* Middle part */}
         <div className="overflow-y-scroll max-h-[48rem]">
                     {/* Messages Filed */}
+                    {
+                        showMessages()
+                    }
         </div>
 
         {/* Last part */}
@@ -46,110 +120,6 @@ function ChatScreen({chat, messages}) {
             </div>
         </div>
         
-
-  
-
-
-
-
-
-
-
-
-
-
-
-        {/* Chatting Message Screen */}
-        {/* <div className="abosulute top-20 bottom-16 overflow-y-scroll">
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1><h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1> <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1> <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-
-
-
-
-
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-            <h1 className="text-white">Hello</h1>
-        </div> */}
-
-        {/* Input Text Field */}
-        {/* <div className="bg-white h-16 flex items-center w-full fixed bottom-0 z-50 p-1">
-            <form onSubmit={handleSubmit} className="flex space-x-2">
-                <input className="p-4 outerline-none bg-transparent w-full text-black font-semibold" type="text" value={msgInput} onChange={e => setMsgInput(e.target.value)} placeholder="type text message"></input>
-                <button type="submit" className="font-semibold text-black bg-sky-500 rounded-md w-24">Send</button>
-            </form>
-        </div> */}
-        {/* <div className="fixed h-18 bottom-0">
-            <form onSubmit={handleSubmit} className="w-full flex">
-                <input className="p-2 w-full h-18" type="text" value={msgInput} onChange={e => setMsgInput(e.target.value)} placeholder="type text message"></input>
-                <button type="submit" className="font-semibold text-black bg-sky-500 rounded-md p-2 px-5">Send</button>
-            </form>
-        </div> */}
     </div>
   )
 }

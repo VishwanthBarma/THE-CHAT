@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { db } from '../../firebase';
 import { collection, query, where, getDocs, doc, getDoc, Query } from "firebase/firestore";
 import moment from 'moment';
@@ -7,6 +7,7 @@ import ChatScreen from '../../components/Chats/ChatScreen';
 
 function Chat({ data, messages }) {
     const chatUserData = JSON.parse(data);
+    const [mine, setMine] = useState(null);
   return (
     <div className="h-screen">
         <ChatScreen key={chatUserData.id} chat={chatUserData} messages={messages}/>
