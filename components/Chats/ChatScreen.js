@@ -1,7 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { auth, db } from '../../firebase';
-import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
-import moment from 'moment';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useRouter } from 'next/router';
 import firebase from 'firebase/compat/app';
@@ -12,7 +10,6 @@ import { useCollection } from 'react-firebase-hooks/firestore';
 import getRecipientEmail from '../../utils/getRecipientEmail';
 import LoadingBounce from '../Loading/LoadingBounce';
 import TimeAgo from 'timeago-react';
-import StartChat from '../StartingScreens/StartChat';
 
 
 function ChatScreen({data, messages}) {
@@ -107,7 +104,7 @@ function ChatScreen({data, messages}) {
         </div>
 
         {/* Middle part */}
-        <div className="overflow-y-scroll max-h-[48rem] p-3">
+        <div className="overflow-y-scroll max-h-[48rem] fixed left-20 p-3 sm:left-60 right-0">
             {
                 showMessages()
             }
@@ -116,7 +113,7 @@ function ChatScreen({data, messages}) {
 
         {/* Last part */}
         <div className="h-16">
-            <div className="dark:bg-black bg-slate-100 fixed h-16 bottom-0 right-0 left-20 sm:left-60 p-2 flex items-center">
+            <div className="dark:bg-black bg-slate-100 fixed h-16 bottom-0 right-0 left-20 sm:left-60 p-2 flex items-center border-slate-400 border-t-2">
                 <form onSubmit={handleSubmit} className="flex space-x-2 justify-between w-full">
                     <input className="bg-transparent outline-none font-semibold w-full" type="text" value={msgInput} onChange={e => setMsgInput(e.target.value)} placeholder="type text message"></input>
                     <div className="bg-sky-500 w-16 flex justify-center p-3 rounded-md">
