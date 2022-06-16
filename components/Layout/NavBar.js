@@ -6,20 +6,21 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '../../firebase';
 import { collection, query, where, getDocs } from "firebase/firestore";
 import LoadingChatSearch from '../Loading/LoadingChatSearch';
+import { useCollection } from 'react-firebase-hooks/firestore';
 
 function NavBar() {
     const [input, setInput] = useState("");
     const [user] = useAuthState(auth);
     const [loadingSearch, setLoadingSearch] = useState(false);
-    const [loadingChats, setLoadingChats] = useState(false);
-
-    const [userChatList, setUserChatList] = useState(null);
 
     // for search functionality
     const [otherUsers, setOtherUsers] = useState(null);
     const [searchResults, setSearchResults] = useState([]);
 
     const [addedUserEmail, setAddedUserEmail] = useState(null);
+
+    const [userChatList, loading] = useCollection(db.collection("chats"),
+         where("users", 'array-contains', user?.email))
 
     useEffect(() => {
         const getOtherUsers = async () => {
@@ -35,17 +36,6 @@ function NavBar() {
         setSearchResults(() => otherUsers?.docs?.filter(user => user.data().email.includes(input?.toLowerCase())));
         setLoadingSearch(false);
     }, [input]);
-
-    useEffect(() => {
-        setLoadingChats(true);
-        const getUserChatList = async () => {
-            const q = query(collection(db, "chats"), where("users", 'array-contains', user?.email));
-            const querySnapshot = await getDocs(q);
-            setUserChatList(querySnapshot);
-        };
-        getUserChatList();
-        setLoadingChats(false);
-    },[addedUserEmail]);
 
 
     /*
@@ -105,8 +95,7 @@ function NavBar() {
             <div className="p-1 py-2 flex max-h-[28rem] flex-col space-y-2 items-center overflow-y-scroll">
 
                 {
-                    !loadingChats
-                    ?
+                    !loading?
                         userChatList?.docs.length != 0
                         ?
                         userChatList?.docs.map(chat => (<ChatsUser key={chat.id} id={chat.id} isSearchUser={false} user={chat.data()} />))       

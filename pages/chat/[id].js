@@ -8,23 +8,11 @@ import getRecipientEmail from '../../utils/getRecipientEmail';
 
 
 function Chat({ data, messages }) {
-    const [loggedUser] = useAuthState(auth);
-    const chatUserData = JSON.parse(data);
-    const [user, setUser] = useState(null);
-
-    useEffect(() => {
-        const getTheUser = async () => {
-          const q = query(collection(db, "users"), where("email", '==', getRecipientEmail(chatUserData.users, loggedUser)));
-          const querySnapshot = await getDocs(q);
-          setUser(querySnapshot.docs[0].data());
-        }
-        getTheUser();
-    }, [])
-
+    const user = JSON.parse(data);
 
   return (
     <div className="h-screen">
-        <ChatScreen key={chatUserData.id} chat={user} messages={messages}/>
+        <ChatScreen key={user.id} data={user} messages={messages}/>
     </div>
   )
 }

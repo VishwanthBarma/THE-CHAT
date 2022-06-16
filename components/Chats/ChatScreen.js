@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { auth, db } from '../../firebase';
 import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 import moment from 'moment';
@@ -9,20 +9,30 @@ import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import Message from '../Message/Message';
 import { useCollection } from 'react-firebase-hooks/firestore';
+import getRecipientEmail from '../../utils/getRecipientEmail';
+import LoadingBounce from '../Loading/LoadingBounce';
+import TimeAgo from 'timeago-react';
+import StartChat from '../StartingScreens/StartChat';
 
 
-function ChatScreen({chat, messages}) {
+function ChatScreen({data, messages}) {
     const [user] = useAuthState(auth);
+    const [msgInput, setMsgInput] = useState("");
     const router = useRouter();
 
-    const [messageSnapshot] = useCollection(
-        db.collection("chats").doc(router.query.id).collection("messages", "asc")
-    );
+    const endOfMessagesRef = useRef(null);
 
-    const date = new Date(1970, 0, 1);
-    date.setSeconds(chat.lastSeen.seconds);
-    const [msgInput, setMsgInput] = useState("");
+    const [recipientSnapshot, loading] = useCollection(db.collection("users")
+    .where("email", "==", getRecipientEmail(data.users, user))    
+    )
     
+    const chat = recipientSnapshot?.docs?.[0].data();
+    
+    const [messageSnapshot] = useCollection(
+        db.collection("chats").doc(router.query.id).collection("messages")
+            .orderBy('timestamp', "asc")
+        );
+
     
     const handleSubmit = event => {
         event.preventDefault();
@@ -62,17 +72,30 @@ function ChatScreen({chat, messages}) {
         }
     }
 
+    const scrollToBottom = () => {
+        endOfMessagesRef.current.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+        });
+    }
+
   return (
     <div className="">
         {/* Header part */}
+        {
+            !loading?
+            <>
+
         <div className="h-16">    
             <div className="bg-black fixed h-16 top-0 right-0 left-20 flex flex-col justify-center sm:left-60 p-2">
                 <h1 className="font-bold text-black dark:text-orange-400">{chat?.displayName}</h1>
                 <div className="flex space-x-1 text-sm">
                     <h1 className="dark:text-slate-300">Last Active:</h1>
                     {
-                        moment(date).fromNow() ?
-                        <h1 className="dark:text-orange-200 text-black font-semibold opacity-50">{moment(date).fromNow()}</h1>:
+                        chat?.lastSeen?.toDate()?
+                        <h1 className="dark:text-orange-200 text-black font-semibold opacity-50">
+                            <TimeAgo datetime={chat?.lastSeen?.toDate()}/>
+                        </h1>:
                         <h1 className="dark:text-red-300 text-black font-semibold">Unavailable</h1>                
                     }
                 </div>
@@ -80,10 +103,11 @@ function ChatScreen({chat, messages}) {
         </div>
 
         {/* Middle part */}
-        <div className="overflow-y-scroll max-h-[48rem] p-2">
+        <div className="overflow-y-scroll max-h-[48rem] p-3">
             {
                 showMessages()
             }
+            <div ref={endOfMessagesRef}></div>
         </div>
 
         {/* Last part */}
@@ -98,6 +122,12 @@ function ChatScreen({chat, messages}) {
             </div>
         </div>
         
+            </>
+            :
+            <>
+                <LoadingBounce />
+            </>
+        }
     </div>
   )
 }
