@@ -2,7 +2,7 @@ import { ThemeProvider } from 'next-themes'
 import Layout from '../components/Layout/Layout'
 import '../styles/globals.css'
 import { useAuthState } from 'react-firebase-hooks/auth'
-import Login from './Login';
+import Login from '../components/Login';
 import { auth, db } from '../firebase';
 import LoadingBounce from '../components/Loading/LoadingBounce';
 import { useEffect } from 'react';
