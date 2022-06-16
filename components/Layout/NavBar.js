@@ -17,10 +17,9 @@ function NavBar() {
     const [otherUsers, setOtherUsers] = useState(null);
     const [searchResults, setSearchResults] = useState([]);
 
-    const [addedUserEmail, setAddedUserEmail] = useState(null);
 
-    const [userChatList, loading] = useCollection(db.collection("chats"),
-         where("users", 'array-contains', user?.email))
+    const [userChatList, loading] = useCollection(db.collection("chats")
+         .where("users", 'array-contains', user.email));
 
     useEffect(() => {
         const getOtherUsers = async () => {
@@ -56,7 +55,6 @@ function NavBar() {
             db.collection("chats").add({
                 users: [user.email, searchUser.email],
             });
-            setAddedUserEmail(searchUser.email);
         } 
     };
 

@@ -33,7 +33,6 @@ function ChatScreen({data, messages}) {
             .orderBy('timestamp', "asc")
         );
 
-    
     const handleSubmit = event => {
         event.preventDefault();
         // updating the user last seen
