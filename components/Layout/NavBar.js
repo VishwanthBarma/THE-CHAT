@@ -8,19 +8,22 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import LoadingChatSearch from '../Loading/LoadingChatSearch';
 
 function NavBar() {
-    const [input, setInput] = useState(null);
+    const [input, setInput] = useState("");
     const [user] = useAuthState(auth);
     const [loadingSearch, setLoadingSearch] = useState(false);
     const [loadingChats, setLoadingChats] = useState(false);
 
+    const [userChatList, setUserChatList] = useState(null);
+
+    // for search functionality
     const [otherUsers, setOtherUsers] = useState(null);
     const [searchResults, setSearchResults] = useState([]);
-    const [userChatList, setUserChatList] = useState(null);
+
     const [addedUserEmail, setAddedUserEmail] = useState(null);
 
     useEffect(() => {
         const getOtherUsers = async () => {
-            const q = query(collection(db, "users"), where("email", "!=", user.email));
+            const q = query(collection(db, "users"), where("email", "!=", user?.email));
             const querySnapshot = await getDocs(q);
             setOtherUsers(querySnapshot);
         };
@@ -36,7 +39,7 @@ function NavBar() {
     useEffect(() => {
         setLoadingChats(true);
         const getUserChatList = async () => {
-            const q = query(collection(db, "chats"), where("users", 'array-contains', user.email));
+            const q = query(collection(db, "chats"), where("users", 'array-contains', user?.email));
             const querySnapshot = await getDocs(q);
             setUserChatList(querySnapshot);
         };
@@ -44,23 +47,27 @@ function NavBar() {
         setLoadingChats(false);
     },[addedUserEmail]);
 
-    const chatAlreadyExists = (searchUserEmail) => 
+
+    /*
+    * chatAlreadyExists([seaching user email]) -> checks for user in chat of particular person.
+    */
+    const chatAlreadyExists = ( recipientEmail ) => 
         !!userChatList?.docs.find(
-            chat => chat.data().users.find(user => user === searchUserEmail)?.length > 0
+            chat => chat.data().users.find(user => user === recipientEmail)?.length > 0
         );
 
+
+    /*
+    *   addUserToChats([searchUser]) => will add user to the chats if
+    *   not exists in the userChatList
+    */
     const addUserToChats = (searchUser) => {
-        // add searchUser in users chats if not exists
-        console.log("me", user)
-        console.log("you", searchUser);
         if(!chatAlreadyExists(searchUser.email)){
             db.collection("chats").add({
-                myId: user.uid,
                 users: [user.email, searchUser.email],
-                you: searchUser,
             });
             setAddedUserEmail(searchUser.email);
-        }
+        } 
     };
 
   return (
@@ -102,7 +109,7 @@ function NavBar() {
                     ?
                         userChatList?.docs.length != 0
                         ?
-                        userChatList?.docs.map(chat => (<ChatsUser key={chat.id} chatId={chat.id} searchUser={false} user={chat.data()} firstEmail={chat.data().users[0]}/>))       
+                        userChatList?.docs.map(chat => (<ChatsUser key={chat.id} id={chat.id} isSearchUser={false} user={chat.data()} />))       
                         :
                         <h1 className="font-semibold text-red-500">No Chats</h1>
                     :
@@ -128,7 +135,7 @@ function NavBar() {
                             ?
                             searchResults?.map(user =>
                                 !chatAlreadyExists(user.data().email) &&
-                                <ChatsUser key={user.id} searchUser={true} user={user.data()} addUserToChats={addUserToChats}/>
+                                <ChatsUser key={user.id} isSearchUser={true} user={user.data()} addUserToChats={addUserToChats}/>
                             )
                             :
                             <h1 className="font-semibold text-red-500">No Users</h1>

@@ -1,9 +1,12 @@
+import { Router } from 'next/router';
 import React from 'react'
 import { auth, provider } from '../firebase'
 
 function Login() {
+    const router = new Router();
     const signIn = () => {
-        auth.signInWithPopup(provider).catch(alert);
+      auth.signInWithPopup(provider).catch(alert);
+      router.redirect("/");
     };
 
   return (

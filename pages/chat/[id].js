@@ -1,16 +1,30 @@
-import React, { useState } from 'react'
-import { db } from '../../firebase';
+import React, { useEffect, useState } from 'react'
+import { auth, db } from '../../firebase';
 import { collection, query, where, getDocs, doc, getDoc, Query } from "firebase/firestore";
 import moment from 'moment';
 import ChatScreen from '../../components/Chats/ChatScreen';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import getRecipientEmail from '../../utils/getRecipientEmail';
 
 
 function Chat({ data, messages }) {
+    const [loggedUser] = useAuthState(auth);
     const chatUserData = JSON.parse(data);
-    const [mine, setMine] = useState(null);
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        const getTheUser = async () => {
+          const q = query(collection(db, "users"), where("email", '==', getRecipientEmail(chatUserData.users, loggedUser)));
+          const querySnapshot = await getDocs(q);
+          setUser(querySnapshot.docs[0].data());
+        }
+        getTheUser();
+    }, [])
+
+
   return (
     <div className="h-screen">
-        <ChatScreen key={chatUserData.id} chat={chatUserData} messages={messages}/>
+        <ChatScreen key={chatUserData.id} chat={user} messages={messages}/>
     </div>
   )
 }
