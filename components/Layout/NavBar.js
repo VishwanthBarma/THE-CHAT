@@ -82,7 +82,7 @@ function NavBar() {
         {/* Search */}
 
         <div className="w-full h-10 bg-slate-100 dark:bg-neutral-900 rounded-md flex items-center justify-center">
-            <input type='text' value={input} onChange={e => setInput(e.target.value)} placeholder='search chat / users' className='bg-transparent w-[90%] items-center outline-none dark:text-slate-200 text-slate-800 hidden sm:inline'></input>
+            <input type='text' value={input} onChange={e => setInput(e.target.value)} placeholder='search users' className='bg-transparent w-[90%] items-center outline-none dark:text-slate-200 text-slate-800 hidden sm:inline'></input>
             <GrFormSearch className="sm:hidden h-8 w-8 opacity-50 dark:opacity-100"/>
         </div>
 

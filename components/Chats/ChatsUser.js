@@ -26,8 +26,6 @@ function ChatsUser({ isSearchUser, id, user, addUserToChats}) {
     isSearchUser ? addUserToChats(user) : router.push(`/chat/${id}`);
   }
 
-  console.log(chatUser?.photoURL);
-
   return (
     <div onClick={() => handleClick()} className="p-1 px-2 w-full flex items-center space-x-1 rounded-md bg-gray-200 dark:bg-neutral-800 hover:opacity-90 active:opacity-100 cursor-pointer hover:border-gray-900 hover:dark:border-slate-300 hover:border-[1px]">
         <div>

@@ -49,6 +49,7 @@ function ChatScreen({data, messages}) {
         })
         
         setMsgInput("");
+        scrollToBottom();
     }
         
     const showMessages = () => {
@@ -73,11 +74,15 @@ function ChatScreen({data, messages}) {
     }
 
     const scrollToBottom = () => {
-        endOfMessagesRef.current.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start',
+        endOfMessagesRef?.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
         });
     }
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages])
 
   return (
     <div className="">
@@ -87,7 +92,7 @@ function ChatScreen({data, messages}) {
             <>
 
         <div className="h-16">    
-            <div className="bg-black fixed h-16 top-0 right-0 left-20 flex flex-col justify-center sm:left-60 p-2">
+            <div className="dark:bg-black bg-slate-100 border-b-2 border-slate-400 fixed h-16 top-0 right-0 left-20 flex flex-col justify-center sm:left-60 p-2">
                 <h1 className="font-bold text-black dark:text-orange-400">{chat?.displayName}</h1>
                 <div className="flex space-x-1 text-sm">
                     <h1 className="dark:text-slate-300">Last Active:</h1>
@@ -107,12 +112,12 @@ function ChatScreen({data, messages}) {
             {
                 showMessages()
             }
-            <div ref={endOfMessagesRef}></div>
+            <div ref={endOfMessagesRef}/>
         </div>
 
         {/* Last part */}
         <div className="h-16">
-            <div className="bg-black fixed h-16 bottom-0 right-0 left-20 sm:left-60 p-2 flex items-center">
+            <div className="dark:bg-black bg-slate-100 fixed h-16 bottom-0 right-0 left-20 sm:left-60 p-2 flex items-center">
                 <form onSubmit={handleSubmit} className="flex space-x-2 justify-between w-full">
                     <input className="bg-transparent outline-none font-semibold w-full" type="text" value={msgInput} onChange={e => setMsgInput(e.target.value)} placeholder="type text message"></input>
                     <div className="bg-sky-500 w-16 flex justify-center p-3 rounded-md">
