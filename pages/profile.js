@@ -5,7 +5,7 @@ import { auth } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 
 
-function profile() {
+function Profile() {
     const [user] = useAuthState(auth);
     const {theme, setTheme} = useTheme();
     const [enabled, setEnabled] = useState();
@@ -52,4 +52,4 @@ function profile() {
   )
 }
 
-export default profile
+export default Profile
